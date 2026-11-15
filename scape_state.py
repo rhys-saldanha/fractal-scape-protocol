@@ -18,7 +18,7 @@ def query(fd):
     os.write(fd, bytes([2, 0xF1, 0x21] + [0] * 61))
     if select.select([fd], [], [], 0.4)[0]:
         return os.read(fd, 128)[1:]  # strip report id
-    return None
+    return None  # no answer: headset is docked
 
 
 if __name__ == '__main__':

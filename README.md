@@ -64,11 +64,18 @@ Notes (tested):
 
 ## Dock detection
 
-The dongle answers a group `0xF1` command only when the headset is awake.
-When the headset is on the dock, the dongle does not answer.
+Send `02 11 21`. The dongle answers at all times. Offset 3 of the reply (report ID removed) shows the dock status:
 
-No answer in 0.4 seconds means that the headset is on the dock.
-This is the only dock signal that the author found in the `0xF1` state. No byte in that state shows the dock status.
+| Offset 3 | Meaning |
+|---|---|
+| `1` | The headset is awake (off the dock) |
+| `0` | The headset is on the dock |
+
+Tested: the value changed when the author lifted the headset and when the author put it on the dock.
+No answer in 0.4 seconds means that the dongle is not usable. Treat it as docked.
+
+A group `0xF1` command (for example `F1 21`) gets no answer while the headset is on the dock.
+No byte in the `F1 21` state shows the dock status.
 
 Poll every 0.25 to 0.5 seconds. Accept a change only after two polls agree.
 The dongle gives short false answers while the headset goes onto the dock.
@@ -78,7 +85,7 @@ The dongle gives short false answers while the headset goes onto the dock.
 | Send | Reply | Meaning |
 |---|---|---|
 | `02 F1 21` | 64 bytes | Headset state. See the next section. |
-| `02 11 21` | `11 21 00 01 ...` | Dongle state. Offset 3 was `1` while the headset was awake. Not tested with the headset on the dock. |
+| `02 11 21` | `11 21 00 <0 or 1> ...` | Dongle state. Offset 3 is `1` while the headset is awake and `0` while it is on the dock (tested). |
 | `02 F1 01` | `F1 01 00 03 30` | Version information (meaning of `03 30` not known) |
 | `02 11 01` | `11 01 00 03 21` | Version information (meaning of `03 21` not known) |
 | `02 FF 21` | All zeros | No data |
